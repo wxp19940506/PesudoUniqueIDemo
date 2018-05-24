@@ -3,8 +3,10 @@ package com.trvqd.androidfingerprient;
 import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 
 import java.security.MessageDigest;
+import java.util.ArrayList;
 
 /**
  * Created by XiaopengWang on 2018/5/23.
@@ -14,77 +16,7 @@ import java.security.MessageDigest;
  */
 
 public class DeviceFingerPrient {
-    public static String getDeviceFingerPrint(Context context) {
-        String deviceID =
-                Build.VERSION.CODENAME+","
-                + Build.VERSION.INCREMENTAL+","
-                + Build.VERSION.RELEASE+","
-
-                + Build.VERSION.SDK+","
-                + Build.VERSION.SDK_INT+",";
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                    if (Build.SUPPORTED_32_BIT_ABIS.length!=0){
-                        for (int i = 0; i <Build.SUPPORTED_32_BIT_ABIS.length ; i++) {
-                            deviceID += Build.SUPPORTED_32_BIT_ABIS[i] +",";
-                        }
-                    }else {
-                        deviceID += "unkonwn,";
-
-                    }
-                    if (Build.SUPPORTED_64_BIT_ABIS.length!=0){
-                        for (int i = 0; i <Build.SUPPORTED_64_BIT_ABIS.length ; i++) {
-                            deviceID += Build.SUPPORTED_64_BIT_ABIS[i] +",";
-                        }
-                    }else {
-                        deviceID += "unkonwn,";
-
-                    }
-
-                    if (Build.SUPPORTED_ABIS.length!=0){
-                        for (int i = 0; i <Build.SUPPORTED_ABIS.length ; i++) {
-                            deviceID += Build.SUPPORTED_ABIS[i] +",";
-                        }
-                    }else {
-                        deviceID += "unkonwn,";
-
-                    }
-
-                }else {
-                    deviceID += "unkonwn,";
-                }
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                    deviceID +=  Build.VERSION.SECURITY_PATCH+",";
-                    deviceID +=  Build.VERSION.BASE_OS+",";
-                }else {
-                    deviceID += "unkonwn,";
-                }
-        deviceID += Build.TIME+","
-                + Build.SERIAL+","
-                + Build.getRadioVersion()+","
-                + Build.BOOTLOADER+","
-                + Build.FINGERPRINT+","
-                + Build.HARDWARE+","
-                + Build.BOARD+","
-                + Build.BRAND+","
-                + Build.CPU_ABI+","
-                + Build.CPU_ABI2+","
-                + Build.DEVICE+","
-                + Build.HOST+","
-                + Build.ID+","
-                + Build.MANUFACTURER+","
-                + Build.MODEL+","
-                + Build.PRODUCT+","
-                + Build.TAGS+","
-                + Build.TYPE+","
-                + Build.USER+","
-                + Build.DISPLAY+","
-                +Settings.System.getString(context.getContentResolver(), Settings.System.ANDROID_ID);
-
-
-        return getMD5Code(deviceID).substring(0,8)+"-"+getMD5Code(deviceID).substring(8,12)+"-"+getMD5Code(deviceID).substring(12,16)+"-"+getMD5Code(deviceID).substring(16,20)+"-"+getMD5Code(deviceID).substring(20);
-    }
-
-    public static String getDeviceFingerPrint(Context context,String custom) {
+    public static String init(){
         String deviceID =
                 Build.VERSION.CODENAME+","
                         + Build.VERSION.INCREMENTAL+","
@@ -147,15 +79,61 @@ public class DeviceFingerPrient {
                 + Build.TAGS+","
                 + Build.TYPE+","
                 + Build.USER+","
-                + Build.DISPLAY+","
-                +Settings.System.getString(context.getContentResolver(), Settings.System.ANDROID_ID)+","
-                + custom;
+                + Build.DISPLAY+",";
+        return deviceID;
+
+    }
+    public static String getDeviceFingerPrint(Context context) {
+
+        String final_uuid = (String) SharedPreferencesUtils.getParam(context, "uuid", "empty");
+        Log.e("TAG","final_uuid："+final_uuid);
+
+        if (final_uuid.trim().equals("empty")){
+            Log.e("TAG","写进去了");
+            String deviceID = init()+Settings.System.getString(context.getContentResolver(), Settings.System.ANDROID_ID);
+            String md5_totle =  getMD5Code(deviceID);
+            final_uuid = md5_totle.substring(0,8)+"-"+md5_totle.substring(8,12)+"-"+md5_totle.substring(12,16)+"-"+md5_totle.substring(16,20)+"-"+md5_totle.substring(20);
+            SharedPreferencesUtils.setParam(context, "uuid", final_uuid);
+        }
 
 
-        return getMD5Code(deviceID).substring(0,8)+"-"+getMD5Code(deviceID).substring(8,12)+"-"+getMD5Code(deviceID).substring(12,16)+"-"+getMD5Code(deviceID).substring(16,20)+"-"+getMD5Code(deviceID).substring(20);
+        return final_uuid;
     }
 
-    public static String MD5(String key) {
+    public static String getDeviceFingerPrint(Context context,String custom) {
+        String final_uuid = (String) SharedPreferencesUtils.getParam(context, "uuid", "empty");
+        if (final_uuid.trim().equals("empty")) {
+            String deviceID = init()
+                    +Settings.System.getString(context.getContentResolver(), Settings.System.ANDROID_ID)+","
+                    + custom;
+            String md5_totle =  getMD5Code(deviceID);
+            final_uuid =md5_totle.substring(0,8)+"-"+md5_totle.substring(8,12)+"-"+md5_totle.substring(12,16)+"-"+md5_totle.substring(16,20)+"-"+md5_totle.substring(20);
+            SharedPreferencesUtils.setParam(context, "uuid", final_uuid);
+        }
+
+        return final_uuid;
+    }
+    public static String getDeviceFingerPrint(Context context,ArrayList customList) {
+        String final_uuid = (String) SharedPreferencesUtils.getParam(context, "uuid", "empty");
+        if (final_uuid.trim().equals("empty")) {
+            String deviceID = init()
+                    +Settings.System.getString(context.getContentResolver(), Settings.System.ANDROID_ID)+","
+                    ;
+            if (customList.size() !=0){
+                for (int i = 0; i < customList.size(); i++) {
+                    deviceID += customList.get(i);
+                }
+            }
+            String md5_totle =  getMD5Code(deviceID);
+            final_uuid = md5_totle.substring(0,8)+"-"+md5_totle.substring(8,12)+"-"+md5_totle.substring(12,16)+"-"+md5_totle.substring(16,20)+"-"+md5_totle.substring(20);
+            SharedPreferencesUtils.setParam(context, "uuid", final_uuid);
+        }
+
+
+        return final_uuid;
+    }
+
+    private static String MD5(String key) {
         char hexDigits[] = {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
         };
@@ -182,7 +160,7 @@ public class DeviceFingerPrient {
         }
     }
     // md5加密
-    public static String getMD5Code(String message) {
+    private static String getMD5Code(String message) {
         String md5Str = "";
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES. O){
             try {
@@ -202,7 +180,7 @@ public class DeviceFingerPrient {
     }
 
     // 2进制转16进制
-    public static String bytes2Hex(byte[] bytes) {
+    private static String bytes2Hex(byte[] bytes) {
         StringBuffer result = new StringBuffer();
         int temp;
         try {
