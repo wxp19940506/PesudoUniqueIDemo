@@ -25,7 +25,7 @@ android {
 //打jar包
     // Copy类型
     task makeJar(type: Jar) {
-        archiveName = 'android-fingerprint-uuid-v1.0.jar' //最终jar包的名称
+        archiveName = 'android-trvqd-fingerprint-v1.0.jar' //最终jar包的名称
         from(project.zipTree('build/intermediates/bundles/release/classes.jar')) //需要打的juhepaysdk的编译文件
 //        from(project.zipTree('build/intermediates/bundles/release/libs/banksdk.jar')) //需要打的juhepaysdk所以来的jar包
 //        from(project.zipTree('build/intermediates/bundles/release/libs/libammsdk.jar')) //需要打的juhepaysdk所以来的jar包
