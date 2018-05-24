@@ -1,0 +1,46 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 26
+
+
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+//打jar包
+    // Copy类型
+    task makeJar(type: Jar) {
+        archiveName = 'android-fingerprint-uuid-v1.0.jar' //最终jar包的名称
+        from(project.zipTree('build/intermediates/bundles/release/classes.jar')) //需要打的juhepaysdk的编译文件
+//        from(project.zipTree('build/intermediates/bundles/release/libs/banksdk.jar')) //需要打的juhepaysdk所以来的jar包
+//        from(project.zipTree('build/intermediates/bundles/release/libs/libammsdk.jar')) //需要打的juhepaysdk所以来的jar包
+        destinationDir = file('build/libs') //jar包输出路径
+    }
+    makeJar.dependsOn(build) //必须写的配置
+
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
